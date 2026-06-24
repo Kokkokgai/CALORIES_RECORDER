@@ -69,3 +69,16 @@ export function toggleFavourite(key) {
 // ── Dark mode ──────────────────────────────────────────────────────────────
 export const getDarkMode  = ()   => g('dark', false);
 export const saveDarkMode = (on) => s('dark', on);
+
+// ── Yesterday's log ────────────────────────────────────────────────────────
+export function getYesterday() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0];
+}
+
+// ── Meal presets ───────────────────────────────────────────────────────────
+export const getPresets  = ()    => g('presets', []);
+export const savePresets = (arr) => s('presets', arr);
+export function addPreset(preset) { savePresets([...getPresets(), preset]); }
+export function deletePreset(id)  { savePresets(getPresets().filter(p => p.id !== id)); }

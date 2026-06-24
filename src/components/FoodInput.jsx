@@ -3,8 +3,24 @@ import { FOOD_DATABASE, calculateNutrition, toTitleCasePublic as ttc } from '../
 import { parseFood, searchFoods } from '../utils/foodParser.js';
 import { getRecents, addRecent, getFavourites, toggleFavourite } from '../utils/storage.js';
 
+const MEALS = [
+  { key: 'breakfast', label: 'Breakfast', icon: '🌅' },
+  { key: 'lunch',     label: 'Lunch',     icon: '🥗' },
+  { key: 'dinner',    label: 'Dinner',    icon: '🍽️' },
+  { key: 'snack',     label: 'Snack',     icon: '🍎' },
+];
+
+function defaultMeal() {
+  const h = new Date().getHours();
+  if (h >= 5  && h < 11) return 'breakfast';
+  if (h >= 11 && h < 15) return 'lunch';
+  if (h >= 15 && h < 21) return 'dinner';
+  return 'snack';
+}
+
 export default function FoodInput({ onAdd }) {
   const [mode, setMode] = useState('quick'); // 'quick' | 'macros'
+  const [meal, setMeal] = useState(defaultMeal);
 
   // ── Quick Add state ───────────────────────────────────────────────────────
   const [input,       setInput]       = useState('');
@@ -88,6 +104,7 @@ export default function FoodInput({ onAdd }) {
       carbs:    result.carbs,
       fat:      result.fat,
       fiber:    result.fiber,
+      meal,
     });
 
     if (foodKey) {
@@ -112,7 +129,7 @@ export default function FoodInput({ onAdd }) {
   function handleMacroAdd(e) {
     e.preventDefault();
     if (!canAddMacros) return;
-    onAdd({ foodName: macroName.trim(), calories: macroCalories, protein: p||null, carbs: c||null, fat: f||null, fiber: null });
+    onAdd({ foodName: macroName.trim(), calories: macroCalories, protein: p||null, carbs: c||null, fat: f||null, fiber: null, meal });
     setMacroName(''); setMacroProtein(''); setMacroCarbs(''); setMacroFat('');
   }
 
@@ -121,6 +138,20 @@ export default function FoodInput({ onAdd }) {
   return (
     <div className="card">
       <h3>Add Food</h3>
+
+      <div className="meal-selector">
+        {MEALS.map(m => (
+          <button
+            key={m.key}
+            type="button"
+            className={`meal-btn${meal === m.key ? ' active' : ''}`}
+            onClick={() => setMeal(m.key)}
+          >
+            <span className="meal-icon">{m.icon}</span>
+            <span className="meal-label">{m.label}</span>
+          </button>
+        ))}
+      </div>
 
       <div className="mode-tabs">
         <button className={`mode-tab${mode === 'quick'  ? ' active' : ''}`} type="button" onClick={() => setMode('quick')}>Quick Add</button>

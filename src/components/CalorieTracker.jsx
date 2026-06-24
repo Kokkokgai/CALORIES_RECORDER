@@ -1,7 +1,17 @@
 import { useState, useEffect } from 'react';
 import FoodInput from './FoodInput.jsx';
 import DailyLog from './DailyLog.jsx';
-import { today, getDailyLog, saveDailyLog } from '../utils/storage.js';
+import {
+  today, getDailyLog, saveDailyLog,
+  getYesterday, getPresets, addPreset, deletePreset,
+} from '../utils/storage.js';
+
+const MEAL_META = {
+  breakfast: { label: 'Breakfast', icon: '🌅' },
+  lunch:     { label: 'Lunch',     icon: '🥗' },
+  dinner:    { label: 'Dinner',    icon: '🍽️' },
+  snack:     { label: 'Snack',     icon: '🍎' },
+};
 
 function MacroBar({ label, consumed, target, color }) {
   const pct  = target > 0 ? Math.min((consumed / target) * 100, 100) : 0;
@@ -22,7 +32,12 @@ function MacroBar({ label, consumed, target, color }) {
 }
 
 export default function CalorieTracker({ profile, onEditProfile }) {
-  const [entries, setEntries] = useState(() => getDailyLog(today()));
+  const [entries,  setEntries]  = useState(() => getDailyLog(today()));
+  const [presets,  setPresets]  = useState(() => getPresets());
+
+  // preset draft: { meal, items } — waiting for user to name it
+  const [draft,    setDraft]    = useState(null);
+  const [draftName, setDraftName] = useState('');
 
   useEffect(() => { saveDailyLog(today(), entries); }, [entries]);
 
@@ -32,6 +47,52 @@ export default function CalorieTracker({ profile, onEditProfile }) {
 
   function handleDelete(id) {
     setEntries(prev => prev.filter(e => e.id !== id));
+  }
+
+  function handleCopyYesterday() {
+    const yEntries = getDailyLog(getYesterday());
+    if (!yEntries.length) { alert('No entries found for yesterday.'); return; }
+    const copied = yEntries.map(e => ({ ...e, id: Date.now() + Math.random() }));
+    setEntries(prev => [...prev, ...copied]);
+  }
+
+  // DailyLog fires this when user clicks "Save preset" on a meal group
+  function handleSavePreset(meal, items) {
+    const meta = MEAL_META[meal] ?? { label: meal, icon: '🍽️' };
+    setDraft({ meal, items });
+    setDraftName(`My ${meta.label}`);
+  }
+
+  function confirmSavePreset() {
+    if (!draftName.trim() || !draft) return;
+    const totalKcal = draft.items.reduce((a, e) => a + (e.calories ?? 0), 0);
+    const preset = {
+      id:    Date.now(),
+      name:  draftName.trim(),
+      meal:  draft.meal,
+      kcal:  totalKcal,
+      items: draft.items.map(({ foodName, calories, protein, carbs, fat, fiber }) =>
+        ({ foodName, calories, protein, carbs, fat, fiber })
+      ),
+    };
+    addPreset(preset);
+    setPresets(getPresets());
+    setDraft(null);
+    setDraftName('');
+  }
+
+  function handleAddPreset(preset) {
+    const toAdd = preset.items.map(item => ({
+      ...item,
+      id:   Date.now() + Math.random(),
+      meal: preset.meal,
+    }));
+    setEntries(prev => [...prev, ...toAdd]);
+  }
+
+  function handleDeletePreset(id) {
+    deletePreset(id);
+    setPresets(getPresets());
   }
 
   const totals = entries.reduce(
@@ -57,7 +118,10 @@ export default function CalorieTracker({ profile, onEditProfile }) {
       <div className="card summary-card">
         <div className="summary-header">
           <h2>Today's Log</h2>
-          <button className="btn-link" onClick={onEditProfile}>Edit Profile</button>
+          <div className="summary-actions">
+            <button className="btn-link" onClick={handleCopyYesterday}>Copy yesterday</button>
+            <button className="btn-link" onClick={onEditProfile}>Edit profile</button>
+          </div>
         </div>
         <div className="summary-grid">
           <div className="summary-item">
@@ -94,8 +158,53 @@ export default function CalorieTracker({ profile, onEditProfile }) {
         </div>
       )}
 
+      {/* Meal Presets */}
+      {(presets.length > 0 || draft) && (
+        <div className="card">
+          <h3>Meal Presets</h3>
+
+          {/* Naming draft */}
+          {draft && (
+            <div className="preset-draft">
+              <span className="preset-draft-label">
+                {MEAL_META[draft.meal]?.icon} Save {draft.items.length} item{draft.items.length !== 1 ? 's' : ''} as:
+              </span>
+              <div className="preset-draft-row">
+                <input
+                  type="text"
+                  value={draftName}
+                  onChange={e => setDraftName(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') confirmSavePreset(); if (e.key === 'Escape') setDraft(null); }}
+                  className="preset-name-input"
+                  autoFocus
+                  maxLength={40}
+                />
+                <button className="btn-primary btn-sm" onClick={confirmSavePreset} disabled={!draftName.trim()}>Save</button>
+                <button className="btn-secondary btn-sm" onClick={() => setDraft(null)}>Cancel</button>
+              </div>
+            </div>
+          )}
+
+          {presets.map(preset => {
+            const meta = MEAL_META[preset.meal] ?? { icon: '🍽️' };
+            return (
+              <div key={preset.id} className="preset-row">
+                <div className="preset-info">
+                  <span className="preset-name">{meta.icon} {preset.name}</span>
+                  <span className="preset-meta">{preset.items.length} item{preset.items.length !== 1 ? 's' : ''} · {preset.kcal} kcal</span>
+                </div>
+                <div className="preset-actions">
+                  <button className="btn-secondary btn-sm" onClick={() => handleAddPreset(preset)}>Add to log</button>
+                  <button className="btn-delete" onClick={() => handleDeletePreset(preset.id)} aria-label="Delete preset">✕</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       <FoodInput onAdd={handleAdd} />
-      <DailyLog entries={entries} onDelete={handleDelete} />
+      <DailyLog entries={entries} onDelete={handleDelete} onSavePreset={handleSavePreset} />
     </div>
   );
 }
