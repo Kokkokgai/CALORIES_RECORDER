@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import FoodInput from './FoodInput.jsx';
 import DailyLog from './DailyLog.jsx';
+import SmartRefuel from './SmartRefuel.jsx';
 import {
   today, getDailyLog, saveDailyLog,
   getYesterday, getPresets, addPreset, deletePreset,
@@ -203,6 +204,7 @@ export default function CalorieTracker({ profile, onEditProfile }) {
         </div>
       )}
 
+      <SmartRefuel totals={totals} profile={profile} onAdd={handleAdd} />
       <FoodInput onAdd={handleAdd} />
       <DailyLog entries={entries} onDelete={handleDelete} onSavePreset={handleSavePreset} />
     </div>

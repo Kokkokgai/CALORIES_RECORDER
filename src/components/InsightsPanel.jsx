@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { generateInsights } from '../utils/insights.js';
 import { getWeeklyLogs, getBodyLog, today, getDailyLog } from '../utils/storage.js';
+import WeeklySummary from './WeeklySummary.jsx';
 
 const TYPE_STYLE = {
   success: { bg: 'var(--color-accent-light)', border: 'var(--color-accent)', text: 'var(--color-accent)' },
@@ -41,6 +42,7 @@ export default function InsightsPanel({ profile }) {
 
   return (
     <div className="view-content">
+      <WeeklySummary profile={profile} />
       <div className="card">
         <h3>Smart Insights</h3>
         <p className="subtitle" style={{ marginBottom: '1rem' }}>

@@ -77,8 +77,43 @@ export function getYesterday() {
   return d.toISOString().split('T')[0];
 }
 
+// ── Monthly snapshot (last 30 days) ───────────────────────────────────────
+export function getMonthlyLogs() {
+  return Array.from({ length: 30 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (29 - i));
+    const date = d.toISOString().split('T')[0];
+    return { date, entries: getDailyLog(date) };
+  });
+}
+
 // ── Meal presets ───────────────────────────────────────────────────────────
 export const getPresets  = ()    => g('presets', []);
 export const savePresets = (arr) => s('presets', arr);
 export function addPreset(preset) { savePresets([...getPresets(), preset]); }
 export function deletePreset(id)  { savePresets(getPresets().filter(p => p.id !== id)); }
+
+// ── Meal plan (stored by week's Monday date) ───────────────────────────────
+export function currentWeekMonday() {
+  const d = new Date();
+  const dow = d.getDay() || 7; // make Sunday = 7
+  d.setDate(d.getDate() - dow + 1);
+  return d.toISOString().split('T')[0];
+}
+
+export function getWeekDates(mondayStr) {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(mondayStr + 'T00:00');
+    d.setDate(d.getDate() + i);
+    return d.toISOString().split('T')[0];
+  });
+}
+
+export function shiftWeek(mondayStr, delta) {
+  const d = new Date(mondayStr + 'T00:00');
+  d.setDate(d.getDate() + delta * 7);
+  return d.toISOString().split('T')[0];
+}
+
+export const getMealPlan  = (mondayStr)       => g(`plan_${mondayStr}`, {});
+export const saveMealPlan = (mondayStr, plan) => s(`plan_${mondayStr}`, plan);

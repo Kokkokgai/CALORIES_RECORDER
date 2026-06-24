@@ -6,9 +6,10 @@ import CoachMode from './components/CoachMode.jsx';
 import DataBackup from './components/DataBackup.jsx';
 
 // Lazy-loaded: these pull in recharts (~300 kB) and only load when first visited
-const Dashboard    = lazy(() => import('./components/Dashboard.jsx'));
-const BodyProgress = lazy(() => import('./components/BodyProgress.jsx'));
+const Dashboard     = lazy(() => import('./components/Dashboard.jsx'));
+const BodyProgress  = lazy(() => import('./components/BodyProgress.jsx'));
 const BMRCalculator = lazy(() => import('./components/BMRCalculator.jsx'));
+const MealPlanner   = lazy(() => import('./components/MealPlanner.jsx'));
 import { getProfile, saveProfile, clearProfile, getDarkMode, saveDarkMode, getDailyLog, today } from './utils/storage.js';
 import './App.css';
 
@@ -82,6 +83,12 @@ export default function App() {
             profile={profile}
             onEditProfile={handleEditProfile}
           />
+        );
+      case 'plan':
+        return (
+          <Suspense fallback={fallback}>
+            <MealPlanner />
+          </Suspense>
         );
       case 'progress':
         return (
