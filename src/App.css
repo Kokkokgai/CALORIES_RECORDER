@@ -578,6 +578,14 @@
    ============================================================ */
 .recharts-tooltip-wrapper { z-index: 9999 !important; }
 
+/* Lazy-load fallback */
+.lazy-loading {
+  text-align: center;
+  padding: 3rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
 /* ============================================================
    Responsive
    ============================================================ */

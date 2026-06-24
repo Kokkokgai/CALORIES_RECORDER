@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import Navigation from './components/Navigation.jsx';
-import Dashboard from './components/Dashboard.jsx';
 import CalorieTracker from './components/CalorieTracker.jsx';
-import BodyProgress from './components/BodyProgress.jsx';
 import InsightsPanel from './components/InsightsPanel.jsx';
 import CoachMode from './components/CoachMode.jsx';
-import BMRCalculator from './components/BMRCalculator.jsx';
+
+// Lazy-loaded: these pull in recharts (~300 kB) and only load when first visited
+const Dashboard    = lazy(() => import('./components/Dashboard.jsx'));
+const BodyProgress = lazy(() => import('./components/BodyProgress.jsx'));
+const BMRCalculator = lazy(() => import('./components/BMRCalculator.jsx'));
 import { getProfile, saveProfile, clearProfile, getDarkMode, saveDarkMode, getDailyLog, today } from './utils/storage.js';
 import './App.css';
 
@@ -47,6 +49,8 @@ export default function App() {
   const showOnboarding = !profile && activeTab === 'profile';
   const needsProfile   = !profile;
 
+  const fallback = <div className="lazy-loading">Loading…</div>;
+
   function renderContent() {
     if (needsProfile && activeTab !== 'profile') {
       return (
@@ -66,7 +70,11 @@ export default function App() {
 
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard profile={profile} todayEntries={todayEntries} />;
+        return (
+          <Suspense fallback={fallback}>
+            <Dashboard profile={profile} todayEntries={todayEntries} />
+          </Suspense>
+        );
       case 'log':
         return (
           <CalorieTracker
@@ -75,7 +83,11 @@ export default function App() {
           />
         );
       case 'progress':
-        return <BodyProgress profile={profile} />;
+        return (
+          <Suspense fallback={fallback}>
+            <BodyProgress profile={profile} />
+          </Suspense>
+        );
       case 'insights':
         return <InsightsPanel profile={profile} />;
       case 'profile':
@@ -92,7 +104,9 @@ export default function App() {
                 </div>
               </div>
             )}
-            <BMRCalculator onSave={handleSaveProfile} />
+            <Suspense fallback={fallback}>
+              <BMRCalculator onSave={handleSaveProfile} />
+            </Suspense>
             <CoachMode profile={profile} />
           </div>
         );
