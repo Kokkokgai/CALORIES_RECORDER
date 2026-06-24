@@ -130,7 +130,7 @@ export default function DataBackup({ onImportDone }) {
       )}
 
       <p className="field-hint" style={{ marginTop: '0.75rem' }}>
-        Exported file contains: profile · food logs · body measurements · water · recents · favourites
+        Exported file contains all <code>nutri_*</code> data: profile · daily food logs · body progress (weight, measurements) · water · meal plans · meal presets · recents · favourites · dark mode preference
       </p>
     </div>
   );
