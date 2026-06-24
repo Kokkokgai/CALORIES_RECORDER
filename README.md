@@ -58,6 +58,11 @@ A production-ready, mobile-first fitness nutrition tracker built with React 19 a
 - Structured coaching response: Today's Focus · Doing Well · Key Improvement · Today's Tip
 - API key entered once and stored locally in the browser
 
+### Backup & Restore
+- **Export JSON** — packs all `nutri_*` localStorage keys into a single `.json` file and downloads it
+- **Import JSON** — reads a backup file and restores all keys; page auto-reloads after import
+- Works as a device-migration tool — export on your old phone/computer, import on the new one
+
 ### UX
 - **Dark mode** — toggle in the header, preference persisted
 - **Mobile-first** — fixed bottom navigation, responsive grid layouts

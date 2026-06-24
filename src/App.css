@@ -578,6 +578,28 @@
    ============================================================ */
 .recharts-tooltip-wrapper { z-index: 9999 !important; }
 
+/* ============================================================
+   Backup & Restore
+   ============================================================ */
+.backup-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.backup-row .btn-primary,
+.backup-row .btn-secondary {
+  flex: 1;
+  min-width: 130px;
+}
+
+.backup-status {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
 /* Lazy-load fallback */
 .lazy-loading {
   text-align: center;

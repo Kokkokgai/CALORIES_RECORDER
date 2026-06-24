@@ -3,6 +3,7 @@ import Navigation from './components/Navigation.jsx';
 import CalorieTracker from './components/CalorieTracker.jsx';
 import InsightsPanel from './components/InsightsPanel.jsx';
 import CoachMode from './components/CoachMode.jsx';
+import DataBackup from './components/DataBackup.jsx';
 
 // Lazy-loaded: these pull in recharts (~300 kB) and only load when first visited
 const Dashboard    = lazy(() => import('./components/Dashboard.jsx'));
@@ -104,6 +105,7 @@ export default function App() {
                 </div>
               </div>
             )}
+            <DataBackup />
             <Suspense fallback={fallback}>
               <BMRCalculator onSave={handleSaveProfile} />
             </Suspense>
